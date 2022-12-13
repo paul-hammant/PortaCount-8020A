@@ -5,6 +5,7 @@ print(" ".join(sys.argv[1:]) + " - " + "{:%B %d, %Y %H:%M:%S}".format(datetime.n
 run = 0
 mmask = 0
 aambient = 0
+aaambient = 0
 mmask_tot = 0
 aambient_tot = 0
 high_pct = 0
@@ -18,12 +19,14 @@ while True:
     words = line.split()
     if words[0] == "Mask":
         mmask = float(words[1])
-        aambient = 0
     if words[0] == "Ambient":
+        aaambient = aambient
         aambient = float(words[1])
-    if mmask > 0 and aambient > 0:
-        pct = ((aambient - mmask) / aambient) * 100
-        ff = '%s' % float('%.3g' % (aambient / mmask))
+    if mmask > 0 and aambient > 0 and aaambient > 0:
+        a = aambient + aaambient
+        m = 2 * mmask
+        pct = ((a - m) / a) * 100
+        ff = '%s' % float('%.3g' % (a / m))
         if pct > high_pct:
             high_pct = pct
             high_ff = ff
@@ -35,7 +38,7 @@ while True:
         run = run + 1
         sys.stdout.write("Ex " + str(run) + ": " + str("%.4f" % pct) + "%, Fit-Factor " + ff + "\n")
         mmask = 0
-        aambient = 0
+        aaambient = 0
     if words[0] == "Overall":
         pct_ave = ((aambient_tot - mmask_tot) / aambient_tot) * 100
         sys.stdout.write("Average: " + str("%.4f" % pct_ave) + "%, Fit-Factor " + str('%s' % float('%.3g' % (aambient_tot / mmask_tot))) + "\n")
@@ -48,4 +51,4 @@ while True:
             first = datetime.now()
             print("ts, duration mins, test, count")
         print(datetime.now().isoformat() + ", " + "{:.2f}".format((datetime.now() - first).total_seconds() / 60) + ", \"" + " ".join(sys.argv[1:]) + "\", " + words[2])
-    # sys.stdout.write("-- line " + line + "--" + str(len(words)))
+#    sys.stdout.write("-- line " + line + "--" + str(len(words)))
